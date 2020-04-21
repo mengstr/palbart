@@ -1,0 +1,45 @@
+/
+/ Hello world!
+/
+
+*10                     / Set current assembly origin to address 10,
+STPTR,  STRNG-1         / An auto-increment register (one of eight at 10-17)
+
+*200                    / Set assembly origin (load address)
+	CLA
+	TLS             / Startup printer
+	TAD (STRNG-1)   / Initialize pointer to message
+	DCA STPTR
+LOOP,   TAD I STPTR     / Pre-increment mem location 10, fetch indirect to get the next character of our message
+	SNA             / Skip on non-zero AC
+	HLT             / Else halt at end of message
+	JMS OUT1        / Write out one character
+	JMP LOOP        / And loop back for more
+OUT1,   0               / Will be replaced by caller's updated PC
+	TSF             / Skip if printer ready
+	JMP .-1         / Wait for flag
+	TLS             / Send the character in the AC
+	CLA CLL         / Clear AC and Link for next pass
+	JMP I OUT1      / Return to caller
+STRNG, "H               / A well-known message
+	"e               /
+	"l               / NOTE:
+	"l               /
+	"o               /   Strings in PAL-8 and PAL-III were "sixbit"
+	",               /   To use ASCII, we spell it out, character by character
+	"                /
+	"w               /
+	"o               /
+	"r               /
+	"l               /
+	"d               /
+	"!               /
+	015              /
+	012              /
+	0                / Mark the end of our null-terminated string (.ASCIZ hadn't been invented yet!)
+
+*400
+	"A
+	"B
+	"C
+$
